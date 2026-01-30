@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>The 49th ICPC Asia East Continent Final Contest-滚榜</title>
+	<link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/scrollboard.css">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/scrollboard.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+	    //2024-12-28 10:00:00 ~ 2024-12-28 15:00:00
+		// 参数说明：
+		// 题目数+金/银/铜奖数（可选）+开始时间+封榜时间
+	    var board = new Board(12, new Array(0, 0, 0), StringToDate("2024-12-28 10:00:00"), StringToDate("2024-12-28 14:00:00"));
+	    board.showInitBoard();
+	    $('html').keydown(function(e) {
+	        if (e.keyCode == 13 || e.keyCode == 32) {
+				e.preventDefault();
+	            board.keydown();
+	        }
+	    });
+    </script>
+</body>
+</html>
