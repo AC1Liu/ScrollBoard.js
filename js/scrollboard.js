@@ -3,7 +3,7 @@
  * ACM竞赛滚榜展示插件，基于JQuery、Bootstrap
  * Forked from https://github.com/qinshaoxuan/ScrollBoard.js
  *
- * Version 2.0
+ * Version 2.0.1
  * Author: 1Liu
  * Github: https://github.com/AC1Liu/ScrollBoard.js
  * Demo: http://labs.ac1liu.com/ScrollBoard/
@@ -783,10 +783,13 @@ Board.prototype.moveTeam = function(toPos) {
                 var currentTop = parseFloat($team.css('top')) || 0;
                 var moveDistance = Math.abs(targetTop - currentTop);
                 var animateTime = 1000;
-                if(targetTop<currentTop) animateTime = (moveDistance / teamHeight) * 100 + 900;
+                if(targetTop<currentTop) {
+                    animateTime = (moveDistance / teamHeight) * 100 + 900;
+                    $team.addClass("scrolling");
+                }
                 $team.animate({ margin: 0 }, 500).animate({ top: targetTop }, animateTime , function() {
                     thisBoard.noAnimate = true;
-                });
+                }).promise().done(function() { this.removeClass("scrolling"); });
             }
             else
                 $team.animate({ margin: 0 }, 500 ,function() {
