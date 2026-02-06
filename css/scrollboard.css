@@ -108,6 +108,7 @@ th.rank, td.solved, td.penalty {
 .team-item.hold {
     z-index: 1000;
     background-color: #406B82!important;
+    color: #fff!important;
 }
 
 .team-item.gold{
