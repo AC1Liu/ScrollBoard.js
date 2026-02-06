@@ -3,7 +3,7 @@
  * ACM竞赛滚榜展示插件，基于JQuery、Bootstrap
  * Forked from https://github.com/qinshaoxuan/ScrollBoard.js
  *
- * Version 2.0.1
+ * Version 2.0.2
  * Author: 1Liu
  * Github: https://github.com/AC1Liu/ScrollBoard.js
  * Demo: http://labs.ac1liu.com/ScrollBoard/
@@ -158,6 +158,7 @@ function Submit(submitId, teamId, alphabetId, subTime, resultId) {
      * @value -1 Waiting
      */
     this.resultId = resultId;
+    this.isFirstSolved = false;
 }
 
 /**
@@ -171,6 +172,7 @@ function TeamProblem() {
     this.acceptedTime = new Date(); //AC时间
     this.submitCount = 0; //AC前提交次数，如果AC了，值加1
     this.realCount = 0;
+    this.isFirstSolved = false;
     this.isUnknown = false; //是否为封榜后提交，如果封榜前已AC，也为false
 }
 
@@ -228,7 +230,7 @@ Team.prototype.init = function(startTime, freezeBoardTime) {
 		if (!p.isAccepted) p.realCount++;
         //更新AC状态
         p.isAccepted = (sub.resultId == 0);
-        console.log( sub.resultId);
+        // console.log( sub.resultId);
         p.lastAttemptedTime = Math.max(p.lastAttemptedTime, sub.subTime.getTime() - startTime.getTime());
         //如果当前提交AC
         if (p.isAccepted) {
@@ -241,6 +243,7 @@ Team.prototype.init = function(startTime, freezeBoardTime) {
                 this.solved++;
                 this.penalty += p.penalty;
             }
+            p.isFirstSolved = sub.isFirstSolved;
         }
 
         //更新submitProblemList
@@ -327,6 +330,7 @@ function Board(problemCount, medalCounts, startTime, freezeBoardTime) {
     this.medalStr = ["gold", "silver", "bronze"];
     this.problemList = []; //题目alphabetId编号列表
     this.startTime = startTime;
+    this.firstSolvedList = [];
     this.freezeBoardTime = freezeBoardTime;
     this.teamList = []; //从服务器获取的teamList，为teamId与Team对象的映射
     this.submitList = []; //从服务器获取的所有的submitList,Submit对象数组
@@ -353,12 +357,22 @@ function Board(problemCount, medalCounts, startTime, freezeBoardTime) {
     //从服务器得到submitList和teamList
     this.submitList = getSubmitList();
     this.teamList = getTeamList();
-    console.log(this.submitList);
+    // console.log(this.submitList);
 
+    for (var key in this.submitList) {
+        var sub = this.submitList[key];
+        if(sub.resultId == 0) {
+            if(!this.firstSolvedList[sub.alphabetId]) this.firstSolvedList[sub.alphabetId] = parseInt(sub.submitId);
+            else this.firstSolvedList[sub.alphabetId] = Math.min(this.firstSolvedList[sub.alphabetId], sub.submitId);
+        }
+    }
 
     //将submit存到对应的Team对象里
     for (var key in this.submitList) {
         var sub = this.submitList[key];
+        if(sub.resultId == 0) {
+            if(parseInt(sub.submitId) === this.firstSolvedList[sub.alphabetId]) this.submitList[key].isFirstSolved = true;
+        }
         this.teamList[sub.teamId].submitList.push(sub);
     }
 
@@ -545,7 +559,8 @@ Board.prototype.showInitBoard = function() {
                     problemHTML += "<span class=\"label label-warning\">" + tProblem.submitCount + "/" + parseInt(tProblem.lastAttemptedTime / 1000.0 / 60.0) + "</span></td>";
                 else {
                     if (tProblem.isAccepted) {
-                        problemHTML += "<span class=\"label label-success\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</span></td>";
+                        if(tProblem.isFirstSolved) problemHTML += "<span class=\"label label-success label-first\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</span></td>";
+                        else problemHTML += "<span class=\"label label-success\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</span></td>";
                     } else {
                         problemHTML += "<span class=\"label label-danger\">" + tProblem.submitCount + "/" + parseInt(tProblem.lastAttemptedTime / 1000.0 / 60.0) + "</span></td>";
                     }
@@ -678,7 +693,8 @@ Board.prototype.updateTeamStatus = function(team) {
                 problemHTML = "<span class=\"label label-warning\">" + tProblem.submitCount + "/" + parseInt(tProblem.lastAttemptedTime / 1000.0 / 60.0) + "</td>";
             else {
                 if (tProblem.isAccepted) {
-                    problemHTML = "<span class=\"label label-success\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</td>";
+                    if(tProblem.isFirstSolved) problemHTML += "<span class=\"label label-success label-first\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</span></td>";
+                    else problemHTML = "<span class=\"label label-success\">" + tProblem.submitCount + "/" + parseInt(tProblem.acceptedTime / 1000.0 / 60.0) + "</td>";
                 } else {
                     problemHTML = "<span class=\"label label-danger\">" + tProblem.submitCount + "/" + parseInt(tProblem.lastAttemptedTime / 1000.0 / 60.0) + "</td>";
                 }

@@ -8,6 +8,10 @@ body{
     font-weight: normal!important;
 }
 
+.label-first {
+    background-color: #23572D;
+}
+
 .label-highlighted {
     border: 2px solid #fff!important;
 }
